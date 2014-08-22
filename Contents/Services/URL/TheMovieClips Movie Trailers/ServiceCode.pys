@@ -1,0 +1,150 @@
+import cgi
+
+BASE_URL = 'https://www.themovieclips.com'
+API_KEY = Prefs['token']
+API_URL = 'https://www.themovieclips.com/api/trailers?token=%s&type=json' % API_KEY
+TIMEOUT = 100000
+
+####################################################################################################
+def Search(query):
+
+    oc = ObjectContainer(title1='TheMovieClips Trailers', title2='Search Results')
+    response = JSON.ObjectFromURL(API_URL+"&name="+String.Quote(query), headers=HTTP_HEADERS)
+
+    if response:
+            for trailer in response.values():
+                url = trailer['link']
+
+                try:
+                   oc.add(URLService.MetadataObjectForURL(url))
+                except:
+                    pass    
+
+#    if trailers['error'] == False:
+#        for trailer in trailers['results']:
+#            url = '%s/%s/#trailer' % (AMT_SITE_URL, trailer['location'].strip('/'))
+#
+#            try:
+#                oc.add(URLService.MetadataObjectForURL(url))
+#            except:
+#                pass
+
+    return oc
+
+####################################################################################################
+def MetadataObjectForURL(url):
+
+    html = HTML.ElementFromURL(url)
+
+    try: summary = html.xpath('//div[@class="movie-plot"]/text()[last()]')[0].strip()
+    except: summary = None
+
+    video_id = html.xpath('//meta[@property="og:video"]/@content')
+
+    if len(video_id) < 1:
+        raise Ex.MediaNotAvailable
+
+    video_id = video_id[0].split('?v=')[-1]
+    trailerurl = API_URL + "&id=" + video_id
+    response = JSON.ObjectFromURL(trailerurl, timeout=TIMEOUT)
+
+    for trailer in response.values():
+        title = trailer['name']
+        duration = trailer['metadata']['duration']
+        thumb = trailer['thumbs']['small']
+        summary = trailer['movie_plot']
+
+    return VideoClipObject(
+        title = title,
+        summary = summary,
+        duration = duration,
+        thumb = Resource.ContentsOfURLWithFallback(thumb)
+    )
+    
+####################################################################################################
+def MediaObjectsForURL(url):
+    
+    Log("Starting media object")
+
+    html = HTML.ElementFromURL(url)
+    video_id = html.xpath('//meta[@property="og:video"]/@content')
+    video_id = video_id[0].split('?v=')[-1]
+
+    url = API_URL + "&id=" + video_id
+    response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
+
+    for trailer in response.values():
+        trailer_id = trailer['trailer_id']
+
+
+    return [
+            MediaObject(
+            container = Container.MP4,
+            video_codec = VideoCodec.H264,
+            video_resolution = '1080',
+            audio_codec = AudioCodec.AAC,
+            audio_channels = 2,
+            optimized_for_streaming = True,
+            parts = [PartObject(key=Callback(PlayVideo, id=trailer_id,  res='1080p'))]
+        ),
+        MediaObject(
+            container = Container.MP4,
+            video_codec = VideoCodec.H264,
+            video_resolution = '720',
+            audio_codec = AudioCodec.AAC,
+            audio_channels = 2,
+            optimized_for_streaming = True,
+            parts = [PartObject(key=Callback(PlayVideo, id=trailer_id,  res='720p'))]
+        ),
+        MediaObject(
+            container = Container.MP4,
+            video_codec = VideoCodec.H264,
+            video_resolution = '480',
+            audio_codec = AudioCodec.AAC,
+            audio_channels = 2,
+            optimized_for_streaming = True,
+            parts = [PartObject(key=Callback(PlayVideo, id=trailer_id, res='480p'))]
+        ),
+        MediaObject(
+            container = Container.MP4,
+            video_codec = VideoCodec.H264,
+            video_resolution = '360',
+            audio_codec = AudioCodec.AAC,
+            audio_channels = 2,
+            optimized_for_streaming = True,
+            parts = [PartObject(key=Callback(PlayVideo, id=trailer_id, res='360p'))]
+        )
+    ]
+
+####################################################################################################
+@indirect
+def PlayVideo(id, res):
+
+    url = API_URL + "&id=" + id
+    response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
+
+    for trailer in response.values():
+        if trailer['embed']['html5']['normal']['1080p'] and res == "1080":
+            if Prefs['secure']:
+                video_url = trailer['embed']['html5']['secure']['1080p']
+            else:
+                video_url = trailer['embed']['html5']['normal']['1080p']
+        elif res == "720p":
+            if Prefs['secure']:
+                video_url = trailer['embed']['html5']['secure']['720p']
+            else:
+                video_url = trailer['embed']['html5']['normal']['720p']
+        elif res == "480p":
+            if Prefs['secure']:
+                video_url = trailer['embed']['html5']['secure']['480p']
+            else:
+                video_url = trailer['embed']['html5']['normal']['480p']        
+        elif res == "360p":
+            if Prefs['secure']:
+                video_url = trailer['embed']['html5']['secure']['360p']
+            else:
+                video_url = trailer['embed']['html5']['normal']['360p']
+        else:
+            raise Ex.MediaNotAvailable
+
+    return IndirectResponse(VideoClipObject, key=video_url)

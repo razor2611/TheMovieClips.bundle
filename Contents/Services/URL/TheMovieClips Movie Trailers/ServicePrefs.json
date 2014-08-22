@@ -1,0 +1,20 @@
+[
+	{
+		"id":"token",
+		"type":"text",
+		"label":"Api Key",
+		"default":"59384a21e924ff56b2300b6e9290aa39"
+	},
+	{
+		"id":"secure",
+		"label":"Use HTTPS",
+		"type":"bool",
+		"default":"false"
+	},
+	{
+		"id":"UA",
+		"type":"text",
+		"label":"UA",
+		"default":"Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.154 Safari/537.36"
+	}
+]
