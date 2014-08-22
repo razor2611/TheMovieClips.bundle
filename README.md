@@ -16,3 +16,8 @@ Todo List:
 
 none, maybe to add more features
 Plugin was tested on plex web, ipad mini, iphone 4, lg tv and casting with chromecast
+=======
+TheMovieClips.bundle
+====================
+
+Video Plex Plugin for watching trailers and clips from TheMovieClips.com
