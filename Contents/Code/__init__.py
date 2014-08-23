@@ -1,11 +1,3 @@
-# Original Icon and Code by Ryan McNally.
-# 2.1 rewrite, URL service by Mike McCurdy June 2012.
-# Updated by sander1 on 23 Nov, 2012: make use of existing URL Services only (AMT, Yahoo Movies, YouTube, moviefone, IGN)
-#
-# TODO: 
-# Thumbnails from the site are poster aspect ratio, which looks awful in the VideoClipObject list previews in mediastream.
-#
-
 TITLE = 'TheMovieClips'
 ART = 'art-default.jpg'
 ICON = 'icon-default.png'
@@ -39,21 +31,8 @@ def MainMenu():
 	oc.add(PrefsObject(title="Settings"))
 	oc.add(DirectoryObject(key=Callback(MoviesMenu, url=API_URL+'&limit=30', title='Latest'), title='Latest Trailers'))
 	oc.add(DirectoryObject(key=Callback(MoviesMenu, url=IN_THEATERS, title='In Theathers'), title='In Theathers'))
-	#oc.add(DirectoryObject(key=Callback(LibraryAlphaList), title='Library'))
 	oc.add(DirectoryObject(key=Callback(MoviesMenu, url=COMMING_SOON, title='Trailers Comming Soon'), title='Comming Soon'))
 	oc.add(DirectoryObject(key=Callback(MoviesMenu, url=POPULAR, title='Popular Trailers'), title='Popular Trailers'))
-	return oc
-
-####################################################################################################
-@route('/video/themovieclips/library/alpha')
-def LibraryAlphaList():
-
-	oc = ObjectContainer(title2='Library', view_group='List')
-	oc.add(DirectoryObject(key=Callback(MoviesMenu, url=LIBRARY % '0', title='Library - #'), title='#'))
-
-	for char in map(chr, range(65, 91)):
-		oc.add(DirectoryObject(key=Callback(MoviesMenu, url=LIBRARY % char, title='Library - %s' % char), title=char))
-
 	return oc
 
 ####################################################################################################
