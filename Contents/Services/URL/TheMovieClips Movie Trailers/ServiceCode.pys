@@ -39,7 +39,8 @@ def MetadataObjectForURL(url):
     try: summary = html.xpath('//div[@class="movie-plot"]/text()[last()]')[0].strip()
     except: summary = None
 
-    video_id = html.xpath('//meta[@property="og:video"]/@content')
+    try: video_id = html.xpath('//meta[@property="og:video"]/@content')
+    except: raise Ex.MediaNotAvailable
 
     if len(video_id) < 1:
         raise Ex.MediaNotAvailable
@@ -50,7 +51,9 @@ def MetadataObjectForURL(url):
 
     for trailer in response.values():
         title = trailer['name']
-        duration = trailer['metadata']['duration']
+        duration = None
+        if trailer['metadata']['duration'] and int(trailer['metadata']['duration']) > 0:
+            duration = trailer['metadata']['duration'] * 1000
         thumb = trailer['thumbs']['small']
         summary = trailer['movie_plot']
 

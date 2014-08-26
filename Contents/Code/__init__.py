@@ -1,3 +1,10 @@
+# Code by Nastase Alexandru.
+# Github code on https://github.com/razor2611/TheMovieClips.bundle
+# Manual install documentation https://support.plex.tv/hc/en-us/articles/201187656-How-do-I-manually-install-a-channel-
+# or you can install it from UnSupported AppStore plugin 
+#
+
+
 TITLE = 'TheMovieClips'
 ART = 'art-default.jpg'
 ICON = 'icon-default.png'
@@ -8,7 +15,10 @@ IMDB_URL = 'https://www.themovieclips.com/api/trailers?token=%s&type=json' % API
 IN_THEATERS = 'https://www.themovieclips.com/api/in-theaters?token=%s&type=json' % API_KEY
 COMMING_SOON = 'https://www.themovieclips.com/api/upcoming?token=%s&type=json' % API_KEY
 POPULAR = 'https://www.themovieclips.com/api/popular?token=%s&type=json' % API_KEY
+GETGENRES = 'https://www.themovieclips.com/api/getgenres?token=%s&type=json' % API_KEY
+GENRE = 'https://www.themovieclips.com/api/genre?token=%s&type=json' % API_KEY
 RESOLUTIONS = ['360p', '480p', '720p', '1080p']
+TIMEOUT = 100000;
 
 ####################################################################################################
 def Start():
@@ -33,14 +43,23 @@ def MainMenu():
 	oc.add(DirectoryObject(key=Callback(MoviesMenu, url=IN_THEATERS, title='In Theathers'), title='In Theathers'))
 	oc.add(DirectoryObject(key=Callback(MoviesMenu, url=COMMING_SOON, title='Trailers Comming Soon'), title='Comming Soon'))
 	oc.add(DirectoryObject(key=Callback(MoviesMenu, url=POPULAR, title='Popular Trailers'), title='Popular Trailers'))
+	oc.add(DirectoryObject(key=Callback(GenresMenu, url=GETGENRES, title='Genres'), title='Genres'))
 	return oc
+####################################################################################################
+@route('/video/themovieclips/genres')
+def GenresMenu(url, title):
 
+	oc = ObjectContainer(title2=title, view_group='List')
+	response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
+	for genre in response.values():
+		oc.add(DirectoryObject(key=Callback(MoviesMenu, url=GENRE+'&genre='+genre['alias'], title=genre['name']), title=genre['name']))
+	return oc
 ####################################################################################################
 @route('/video/themovieclips/movies', page=int)
 def MoviesMenu(url, title, page=1):
 
 	oc = ObjectContainer(title2=title, view_group='List')
-	response = JSON.ObjectFromURL(url, timeout=100000)
+	response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 
 	for trailersCollection in response.values():
 		#Log('The variable x = %s' %trailersCollection)
@@ -70,7 +89,7 @@ def MovieMenu(url, title, thumb_url, section=None):
 
 	oc = ObjectContainer(title2=title, view_group='Posters')
 
-	response = JSON.ObjectFromURL(url, timeout=100000)
+	response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 
 	for trailers in response.values():
 
