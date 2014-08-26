@@ -13,7 +13,12 @@ Things done:
 - clips have posters and thumbs and some other metadata
 - it's using an JSON api so it won't break on site changes
 
-Todo List:
-- none, maybe to add more features
+Update:
+
+26.08.2014
+- added genres menu
+- added featurettes and clips with trailers
+- added more error handlers to url service
+
 
 Plugin was tested on plex web, ipad mini, iphone 4, lg tv and casting with chromecast
