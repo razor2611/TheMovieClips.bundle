@@ -71,7 +71,7 @@ def MoviesMenu(url, title, page=1):
 @route('/video/themovieclips/movies/trailer')
 def MovieMenu(url, title, thumb_url, section=None):
 
-	oc = ObjectContainer(title2=title, view_group='Posters')
+	oc = ObjectContainer(title2=unicode(title), view_group='Posters')
 
 	response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 

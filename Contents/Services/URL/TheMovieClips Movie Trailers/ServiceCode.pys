@@ -127,7 +127,7 @@ def PlayVideo(id, res):
     response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 
     for trailer in response.values():
-        if trailer['embed']['html5']['normal']['1080p'] and res == "1080":
+        if trailer['embed']['html5']['normal']['1080p'] and res == "1080p":
             if Prefs['secure']:
                 video_url = trailer['embed']['html5']['secure']['1080p']
             else:
