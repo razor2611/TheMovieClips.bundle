@@ -1,4 +1,5 @@
 # Code by Nastase Alexandru.
+# Version 1.2
 # Github code on https://github.com/razor2611/TheMovieClips.bundle
 # Manual install documentation https://support.plex.tv/hc/en-us/articles/201187656-How-do-I-manually-install-a-channel-
 # or you can install it from UnSupported AppStore plugin 
@@ -59,27 +60,10 @@ def GenresMenu(url, title):
 def MoviesMenu(url, title, page=1):
 
 	oc = ObjectContainer(title2=title, view_group='List')
-	response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 
-	for trailersCollection in response.values():
-		#Log('The variable x = %s' %trailersCollection)
-
-		if 'movie_name' in trailersCollection:
-			movie_name = trailersCollection['movie_name']
-
-		if 'movie_poster' in trailersCollection:
-			movie_thumb = trailersCollection['movie_poster']
-
-		if 'link' in trailersCollection:
-			movie_url = trailersCollection['link']
-
-		if 'movie_plot' in trailersCollection:
-			movie_plot = trailersCollection['movie_plot']
-
-		if 'alternate_ids' in trailersCollection:
-			movie_imdb = trailersCollection['alternate_ids']['imdb']
-
-		oc.add(DirectoryObject(key=Callback(MovieMenu, url=IMDB_URL+'&imdb='+movie_imdb, title=movie_name, thumb_url=movie_thumb), title=movie_name, summary=movie_plot, thumb=Resource.ContentsOfURLWithFallback(movie_thumb)))
+	trailers = BuildDict(url)
+	for trailer in trailers:
+		oc.add(DirectoryObject(key=Callback(MovieMenu, url=IMDB_URL+'&imdb='+trailer['item_imdb'], title=trailer['item_title'], thumb_url=trailer['item_poster']), title=trailer['item_movie_title'], summary=trailer['item_summary'], thumb=Resource.ContentsOfURLWithFallback(trailer['item_poster'])))
 
 	return oc
 
@@ -109,3 +93,42 @@ def MovieMenu(url, title, thumb_url, section=None):
 		oc.add(movie)
 
 	return oc
+
+########################################################################################################
+def BuildDict(url):
+
+	trailers = []
+
+	response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
+
+	for key in response.keys():
+		results = response[key]
+
+		if 'name' in results:
+			name = results['name']
+		if 'movie_name' in results:
+			movie_name = results['movie_name']
+		if 'movie_plot' in results:
+			movie_plot = results['movie_plot']
+		if 'movie_poster' in results:
+			movie_poster = results['movie_poster']
+		if 'thumbs' in results:
+			movie_thumb = results['thumbs']['small']
+		if 'alternate_ids' in results:
+			movie_imdb = results['alternate_ids']['imdb']
+
+
+		trailer = {
+			'id': key,
+			'item_title': name,
+			'item_movie_title': movie_name,			
+			'item_summary': movie_plot,
+			'item_thumb': movie_thumb,
+			'item_poster': movie_poster, 
+			'item_imdb': movie_imdb
+		}
+		trailers.append(trailer)
+
+	trailers.sort(key=lambda x: int(x['id']))
+
+	return trailers

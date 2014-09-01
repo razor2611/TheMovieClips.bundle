@@ -1,5 +1,3 @@
-import cgi
-
 BASE_URL = 'https://www.themovieclips.com'
 API_KEY = Prefs['token']
 API_URL = 'https://www.themovieclips.com/api/trailers?token=%s&type=json' % API_KEY
@@ -18,17 +16,7 @@ def Search(query):
                 try:
                    oc.add(URLService.MetadataObjectForURL(url))
                 except:
-                    pass    
-
-#    if trailers['error'] == False:
-#        for trailer in trailers['results']:
-#            url = '%s/%s/#trailer' % (AMT_SITE_URL, trailer['location'].strip('/'))
-#
-#            try:
-#                oc.add(URLService.MetadataObjectForURL(url))
-#            except:
-#                pass
-
+                    pass   
     return oc
 
 ####################################################################################################
@@ -51,23 +39,35 @@ def MetadataObjectForURL(url):
 
     for trailer in response.values():
         title = trailer['name']
+        summary = trailer['movie_plot']
         duration = None
+        genres = []
+
         if trailer['metadata']['duration'] and int(trailer['metadata']['duration']) > 0:
             duration = trailer['metadata']['duration'] * 1000
         thumb = trailer['thumbs']['small']
-        summary = trailer['movie_plot']
+        if 'year' in trailer :
+            year = int(trailer['year'])
+        if 'movie_genre' in trailer :
+            genres.append(trailer['movie_genre'])
+
+        release = trailer['movie_release_dates'][0]['release_date']
+        release_date = Datetime.ParseDate(release).date()
 
     return VideoClipObject(
         title = title,
         summary = summary,
         duration = duration,
+        genres = genres,
+        year = year,
+        originally_available_at = release_date,
         thumb = Resource.ContentsOfURLWithFallback(thumb)
     )
     
 ####################################################################################################
 def MediaObjectsForURL(url):
     
-    Log("Starting media object")
+#    Log("Starting media object")
 
     html = HTML.ElementFromURL(url)
     video_id = html.xpath('//meta[@property="og:video"]/@content')
