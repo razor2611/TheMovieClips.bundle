@@ -1,5 +1,5 @@
 # Code by Nastase Alexandru.
-# Version 1.2
+# Version 1.2.1
 # Github code on https://github.com/razor2611/TheMovieClips.bundle
 # Manual install documentation https://support.plex.tv/hc/en-us/articles/201187656-How-do-I-manually-install-a-channel-
 # or you can install it from UnSupported AppStore plugin 
@@ -50,10 +50,16 @@ def MainMenu():
 @route('/video/themovieclips/genres')
 def GenresMenu(url, title):
 
+
 	oc = ObjectContainer(title2=title, view_group='List')
 	response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 	for genre in response.values():
-		oc.add(DirectoryObject(key=Callback(MoviesMenu, url=GENRE+'&genre='+genre['alias'], title=genre['name']), title=genre['name']))
+		oc.add(DirectoryObject(
+			key = Callback(MoviesMenu, url=GENRE+'&genre='+genre['alias'], title=genre['name']),
+			title = genre['name']
+		))
+
+	oc.objects.sort(key = lambda obj: obj.title)
 	return oc
 ####################################################################################################
 @route('/video/themovieclips/movies', page=int)
