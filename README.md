@@ -15,6 +15,20 @@ Things done:
 
 Update:
 
+03.09.2014
+- added new 512px icon
+
+02.09.2014
+- unicode fix
+- art resize
+- small fix for url service
+- genres menu are now sorted alphabetical
+
+01.09.2014
+- more metadata exposed
+- sorted the movies
+- removed some old logs
+
 26.08.2014
 - added genres menu
 - added featurettes and clips with trailers
