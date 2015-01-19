@@ -4,16 +4,16 @@ HTTP_HEADERS = {
 
 BASE_URL = 'https://www.themovieclips.com'
 API_KEY = Prefs['token']
-API_URL = 'https://www.themovieclips.com/api/trailers?token=%s&type=json' % API_KEY
+API_URL = 'https://www.themovieclips.com/api/v1/trailers?token=%s&type=json' % API_KEY
 
 ####################################################################################################
 def Search(query):
 
     oc = ObjectContainer(title1='TheMovieClips Trailers', title2='Search Results')
-    response = JSON.ObjectFromURL(API_URL+"&name="+String.Quote(query), headers=HTTP_HEADERS)
+    response = JSON.ObjectFromURL(API_URL+"&title="+String.Quote(query), headers=HTTP_HEADERS)
 
     if response:
-            for trailer in response.values():
+            for trailer in response:
                 url = trailer['link']
 
                 try:

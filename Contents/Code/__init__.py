@@ -11,13 +11,13 @@ ART = 'art-default.jpg'
 ICON = 'icon-default.png'
 BASE_URL = 'https://www.themovieclips.com'
 API_KEY = Prefs['token']
-API_URL = 'https://www.themovieclips.com/api/trailers?token=%s&type=json' % API_KEY
-IMDB_URL = 'https://www.themovieclips.com/api/trailers?token=%s&type=json' % API_KEY
-IN_THEATERS = 'https://www.themovieclips.com/api/in-theaters?token=%s&type=json' % API_KEY
-COMMING_SOON = 'https://www.themovieclips.com/api/upcoming?token=%s&type=json' % API_KEY
-POPULAR = 'https://www.themovieclips.com/api/popular?token=%s&type=json' % API_KEY
-GETGENRES = 'https://www.themovieclips.com/api/getgenres?token=%s&type=json' % API_KEY
-GENRE = 'https://www.themovieclips.com/api/genre?token=%s&type=json' % API_KEY
+API_URL = 'https://www.themovieclips.com/api/v1/trailers?token=%s&type=json' % API_KEY
+IMDB_URL = 'https://www.themovieclips.com/api/v1/trailers?token=%s&type=json' % API_KEY
+IN_THEATERS = 'https://www.themovieclips.com/api/v1/in-theaters?token=%s&type=json' % API_KEY
+COMMING_SOON = 'https://www.themovieclips.com/api/v1/upcoming?token=%s&type=json' % API_KEY
+POPULAR = 'https://www.themovieclips.com/api/v1/popular?token=%s&type=json' % API_KEY
+GETGENRES = 'https://www.themovieclips.com/api/v1/getgenres?token=%s&type=json' % API_KEY
+GENRE = 'https://www.themovieclips.com/api/v1/genre?token=%s&type=json' % API_KEY
 RESOLUTIONS = ['360p', '480p', '720p', '1080p']
 TIMEOUT = 100000;
 
@@ -81,7 +81,8 @@ def MovieMenu(url, title, thumb_url, section=None):
 
 	response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 
-	for trailers in response.values():
+#	for trailers in response.values():
+	for trailers in response:
 
 		if 'name' in trailers:
 			name = trailers['name']
@@ -104,29 +105,33 @@ def MovieMenu(url, title, thumb_url, section=None):
 def BuildDict(url):
 
 	trailers = []
-
+     
 	response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 
-	for key in response.keys():
-		results = response[key]
+#	for key in response.keys():
+	for results in response:
+#		results = response[key]
 
-		if 'name' in results:
-			name = results['name']
-		if 'movie_name' in results:
-			movie_name = results['movie_name']
-		if 'movie_plot' in results:
-			movie_plot = results['movie_plot']
-		if 'movie_poster' in results:
-			movie_poster = results['movie_poster']
-		if 'thumbs' in results:
-			movie_thumb = results['thumbs']['small']
-		if 'alternate_ids' in results:
-			movie_imdb = results['alternate_ids']['imdb']
+		if 'id' in results:
+			id = results['id']
+		if 'title' in results:
+			title = results['title']
+		if 'title' in results['movie']:
+			movie_name = results['movie']['title']
+		if 'plot' in results['movie']:
+			movie_plot = results['movie']['plot']
+		if 'posters' in results['movie']:
+			movie_poster = results['movie']['posters']
+		if 'thumb' in results:
+			movie_thumb = results['thumb']['small']
+		if 'imdb_id' in results:
+			movie_imdb = results['imdb_id']
 
 
 		trailer = {
-			'id': key,
-			'item_title': name,
+#			'id': key,
+			'id': id,
+			'item_title': title,
 			'item_movie_title': movie_name,			
 			'item_summary': movie_plot,
 			'item_thumb': movie_thumb,

@@ -15,6 +15,9 @@ Things done:
 
 Update:
 
+19.01.2015
+- fix for new api format
+
 03.09.2014
 - added new 512px icon
 

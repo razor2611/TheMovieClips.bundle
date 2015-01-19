@@ -1,6 +1,6 @@
 BASE_URL = 'https://www.themovieclips.com'
 API_KEY = Prefs['token']
-API_URL = 'https://www.themovieclips.com/api/trailers?token=%s&type=json' % API_KEY
+API_URL = 'https://www.themovieclips.com/api/v1/trailers?token=%s&type=json' % API_KEY
 TIMEOUT = 100000
 
 ####################################################################################################
@@ -37,22 +37,36 @@ def MetadataObjectForURL(url):
     trailerurl = API_URL + "&id=" + video_id
     response = JSON.ObjectFromURL(trailerurl, timeout=TIMEOUT)
 
-    for trailer in response.values():
-        title = trailer['name']
-        summary = trailer['movie_plot']
-        duration = None
-        genres = []
 
-        if trailer['metadata']['duration'] and int(trailer['metadata']['duration']) > 0:
-            duration = trailer['metadata']['duration'] * 1000
-        thumb = trailer['thumbs']['small']
-        if 'year' in trailer :
-            year = int(trailer['year'])
-        if 'movie_genre' in trailer :
-            genres.append(trailer['movie_genre'])
+ #   for trailer in response.values():
+ #       title = trailer['title']
+ #       summary = trailer['movie']['plot']
+ #       duration = None
+ #       genres = []
+ #
+ #       if trailer['duration'] and int(trailer['metadata']['duration']) > 0:
+ #           duration = trailer['duration'] * 1000
+ #       thumb = trailer['thumb']['small']
+ #       if 'year' in trailer['movie'] :
+ #           year = int(trailer['movie']['year'])
+ #       if 'genre' in trailer['movie'] :
+ #           genres.append(trailer['movie']['genre'])
 
-        release = trailer['movie_release_dates'][0]['release_date']
-        release_date = Datetime.ParseDate(release).date()
+ #       release = trailer['movie_release_dates'][0]['release_date']
+ #       release_date = Datetime.ParseDate(release).date()
+
+
+    title = response['title']
+    summary = response['movie']['plot']
+    duration = None
+    genres = []
+
+    #if response['duration']
+    if response['duration'] and int(response['duration']) > 0:
+        duration = response['duration'] * 1000
+    thumb = response['thumb']['small']
+ #   if 'year' in response['movie']
+    year = int(response['movie']['year'])
 
     return VideoClipObject(
         title = title,
@@ -60,7 +74,7 @@ def MetadataObjectForURL(url):
         duration = duration,
         genres = genres,
         year = year,
-        originally_available_at = release_date,
+ #       originally_available_at = release_date,
         thumb = Resource.ContentsOfURLWithFallback(thumb)
     )
     
@@ -76,9 +90,7 @@ def MediaObjectsForURL(url):
     url = API_URL + "&id=" + video_id
     response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 
-    for trailer in response.values():
-        trailer_id = trailer['trailer_id']
-
+    trailer_id = response['id']
 
     return [
             MediaObject(
@@ -123,31 +135,32 @@ def MediaObjectsForURL(url):
 @indirect
 def PlayVideo(id, res):
 
-    url = API_URL + "&id=" + id
-    response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
+    url = API_URL + "&id=" + str(id)
+    trailer = JSON.ObjectFromURL(url, timeout=TIMEOUT)
 
-    for trailer in response.values():
-        if trailer['embed']['html5']['normal']['1080p'] and res == "1080p":
-            if Prefs['secure']:
-                video_url = trailer['embed']['html5']['secure']['1080p']
-            else:
-                video_url = trailer['embed']['html5']['normal']['1080p']
-        elif res == "720p":
-            if Prefs['secure']:
-                video_url = trailer['embed']['html5']['secure']['720p']
-            else:
-                video_url = trailer['embed']['html5']['normal']['720p']
-        elif res == "480p":
-            if Prefs['secure']:
-                video_url = trailer['embed']['html5']['secure']['480p']
-            else:
-                video_url = trailer['embed']['html5']['normal']['480p']        
-        elif res == "360p":
-            if Prefs['secure']:
-                video_url = trailer['embed']['html5']['secure']['360p']
-            else:
-                video_url = trailer['embed']['html5']['normal']['360p']
+    #for trailer in response.values():
+
+    if trailer['embed']['html5']['1080p'] and res == "1080p":
+        if Prefs['secure']:
+            video_url = trailer['embed']['html5']['1080p']
         else:
-            raise Ex.MediaNotAvailable
+            video_url = trailer['embed']['html5']['1080p']
+    elif res == "720p":
+        if Prefs['secure']:
+            video_url = trailer['embed']['html5']['720p']
+        else:
+            video_url = trailer['embed']['html5']['720p']
+    elif res == "480p":
+        if Prefs['secure']:
+            video_url = trailer['embed']['html5']['480p']
+        else:
+            video_url = trailer['embed']['html5']['480p']        
+    elif res == "360p":
+        if Prefs['secure']:
+            video_url = trailer['embed']['html5']['360p']
+        else:
+            video_url = trailer['embed']['html5']['360p']
+    else:
+        raise Ex.MediaNotAvailable
 
     return IndirectResponse(VideoClipObject, key=video_url)
