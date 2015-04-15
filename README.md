@@ -15,6 +15,10 @@ Things done:
 
 Update:
 
+15.04.2015
+- minor fixes
+- speed improvement
+
 19.01.2015
 - fix for new api format
 

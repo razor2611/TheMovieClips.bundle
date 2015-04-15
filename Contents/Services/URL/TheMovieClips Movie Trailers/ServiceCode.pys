@@ -1,6 +1,9 @@
+HTTP_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/536.30.1 (KHTML, like Gecko) Version/6.0.5 Safari/536.30.1'
+}
 BASE_URL = 'https://www.themovieclips.com'
 API_KEY = Prefs['token']
-API_URL = 'https://www.themovieclips.com/api/v1/trailers?token=%s&type=json' % API_KEY
+API_URL = 'https://www.themovieclips.com/api/v1/trailers?token=%s' % API_KEY
 TIMEOUT = 100000
 
 ####################################################################################################
@@ -22,41 +25,15 @@ def Search(query):
 ####################################################################################################
 def MetadataObjectForURL(url):
 
-    html = HTML.ElementFromURL(url)
+    alias = url.replace(BASE_URL, "")
+    response = JSON.ObjectFromURL(BASE_URL+"/api/v1/getalias"+alias+"?token="+API_KEY, headers=HTTP_HEADERS, timeout=TIMEOUT)
 
-    try: summary = html.xpath('//div[@class="movie-plot"]/text()[last()]')[0].strip()
-    except: summary = None
+  #  video_id = response['id']
 
-    try: video_id = html.xpath('//meta[@property="og:video"]/@content')
-    except: raise Ex.MediaNotAvailable
+  #  trailerurl = "{}{}{}".format(API_URL, "&id=",video_id)
+  #  response = JSON.ObjectFromURL(trailerurl, timeout=TIMEOUT)
 
-    if len(video_id) < 1:
-        raise Ex.MediaNotAvailable
-
-    video_id = video_id[0].split('?v=')[-1]
-    trailerurl = API_URL + "&id=" + video_id
-    response = JSON.ObjectFromURL(trailerurl, timeout=TIMEOUT)
-
-
- #   for trailer in response.values():
- #       title = trailer['title']
- #       summary = trailer['movie']['plot']
- #       duration = None
- #       genres = []
- #
- #       if trailer['duration'] and int(trailer['metadata']['duration']) > 0:
- #           duration = trailer['duration'] * 1000
- #       thumb = trailer['thumb']['small']
- #       if 'year' in trailer['movie'] :
- #           year = int(trailer['movie']['year'])
- #       if 'genre' in trailer['movie'] :
- #           genres.append(trailer['movie']['genre'])
-
- #       release = trailer['movie_release_dates'][0]['release_date']
- #       release_date = Datetime.ParseDate(release).date()
-
-
-    title = response['title']
+    title = response['movie']['title'] + ' ' + response['title'] + ' [' + response['movie']['year'] + ']'
     summary = response['movie']['plot']
     duration = None
     genres = []
@@ -83,13 +60,8 @@ def MediaObjectsForURL(url):
     
 #    Log("Starting media object")
 
-    html = HTML.ElementFromURL(url)
-    video_id = html.xpath('//meta[@property="og:video"]/@content')
-    video_id = video_id[0].split('?v=')[-1]
-
-    url = API_URL + "&id=" + video_id
-    response = JSON.ObjectFromURL(url, timeout=TIMEOUT)
-
+    alias = url.replace(BASE_URL, "")
+    response = JSON.ObjectFromURL(BASE_URL+"/api/v1/getalias"+alias+"?token="+API_KEY, headers=HTTP_HEADERS)   
     trailer_id = response['id']
 
     return [
